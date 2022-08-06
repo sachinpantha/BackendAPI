@@ -74,7 +74,7 @@
 //FOR DATABASE
 const { exists } = require("./../models/tourModel");
 const Tour = require("./../models/tourModel");
-const APIfeatures= require('../utils/apiFeatures')
+const APIfeatures = require('../utils/apiFeatures')
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';   //PREFILLING THE QUERIES
   req.query.sort = '-ratingsAverage,price';
@@ -210,3 +210,34 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
+//Aggregation pipeline
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats =await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {   //FOR AIRTHMETIC CALCULATIONS
+          _id: null,
+          avgRating: {$avg: '$ratingsAverage'},
+          avgPrice: {$avg: '$price'},
+          minPrice: {$min: '$price'},  //FieldName
+          maxPrice: {$max: '$price'},
+        }
+      }
+    ])
+    res.status(200).json({
+      status:'success',
+      data:{
+        stats
+      }
+    })
+  }
+  catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    });
+  }
+}
