@@ -213,32 +213,52 @@ exports.deleteTour = async (req, res) => {
 //Aggregation pipeline
 exports.getTourStats = async (req, res) => {
   try {
-    const stats =await Tour.aggregate([
+    const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
       },
       {
         $group: {   //FOR AIRTHMETIC CALCULATIONS
-          _id: {$toUpper:'$difficulty'},  //Filtering with difficulty
-          numTours: {$sum: 1},  //Adding 1 while looping out through each document
-          numRatings: {$sum:'$ratingsQuantity'},
-          avgRating: {$avg: '$ratingsAverage'},
-          avgPrice: {$avg: '$price'},
-          minPrice: {$min: '$price'},  //FieldName
-          maxPrice: {$max: '$price'},
+          _id: { $toUpper: '$difficulty' },  //Filtering with difficulty
+          numTours: { $sum: 1 },  //Adding 1 while looping out through each document
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },  //FieldName
+          maxPrice: { $max: '$price' },
         }
       },
       {
-          $sort: {avgPrice:1}
-      } //MATCHING CAN BE REPEA
+        $sort: { avgPrice: 1 }
+      } //MATCHING CAN BE REPEATED
       // {
       //   $match: {_id: {$ne: 'EASY'}}  //EXCLUDING DOCUMENTS WITH ID AS EASY
       // }
     ])
     res.status(200).json({
-      status:'success',
-      data:{
+      status: 'success',
+      data: {
         stats
+      }
+    })
+  }
+  catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    });
+  }
+}
+exports.getMonthlyPlan = async (req, res) => {
+  try {
+    const year= req.params.year*1;
+    const plan= await Tour.aggregate([
+      
+    ])
+    res.status(200).json({
+      status: 'success',
+      data: {
+        plan
       }
     })
   }

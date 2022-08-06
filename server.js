@@ -14,7 +14,7 @@ mongoose
     console.log("DB connection succesful");
   });
 const testTour= new Tour({
-  name: "Github repository",   //Creating document using constructor
+  name: "Github GIST",   //Creating document using constructor
   rating: 4.2,
   price: 497
 })

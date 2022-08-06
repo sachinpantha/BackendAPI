@@ -39,13 +39,13 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
     type: String,
     required: ['true', 'A tour must have cover image']
   },
-  image: [String],
+  images: [String],
   createdAt:{
     type: Date,
     default: Date.now(),
     select: false   //Not displaying in api via schema
   },
-  startDate: [Date],
+  startDates: [Date],
   description:{
     type: String,
     trim: true
