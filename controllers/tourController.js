@@ -219,13 +219,21 @@ exports.getTourStats = async (req, res) => {
       },
       {
         $group: {   //FOR AIRTHMETIC CALCULATIONS
-          _id: null,
+          _id: {$toUpper:'$difficulty'},  //Filtering with difficulty
+          numTours: {$sum: 1},  //Adding 1 while looping out through each document
+          numRatings: {$sum:'$ratingsQuantity'},
           avgRating: {$avg: '$ratingsAverage'},
           avgPrice: {$avg: '$price'},
           minPrice: {$min: '$price'},  //FieldName
           maxPrice: {$max: '$price'},
         }
-      }
+      },
+      {
+          $sort: {avgPrice:1}
+      } //MATCHING CAN BE REPEA
+      // {
+      //   $match: {_id: {$ne: 'EASY'}}  //EXCLUDING DOCUMENTS WITH ID AS EASY
+      // }
     ])
     res.status(200).json({
       status:'success',
