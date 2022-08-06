@@ -253,7 +253,38 @@ exports.getMonthlyPlan = async (req, res) => {
   try {
     const year= req.params.year*1;
     const plan= await Tour.aggregate([
-      
+      {
+        $unwind: '$startDates'   //Yo field maa bhako sappai jati ota object cha teti ota unique document return gardincha
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),  //MATCHING START DATES
+            $lte: new Date(`${year}-12-31`)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates'},
+          numTourStarts: {$sum: 1},
+          tours: {$push: '$name'}  //Pushing into tours array
+        }
+      },
+      {
+        $addFields: {month: '$_id'}
+      },
+      {
+        $project:{
+          _id:0      //HIDES THE FIELD WHEN SET TO ZERO
+        }
+      }
+      ,{
+        $sort:{ numTourStarts: -1}   //SORT WITH HIGHEST/BUSIEST MONTH IN THE DOCUMENT(TESTED VIA POSTMAN)
+      },
+      {
+        $limit: 12   //LIMITING THE NUMBER OF DOCUMENTS
+      }
     ])
     res.status(200).json({
       status: 'success',
