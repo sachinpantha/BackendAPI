@@ -4,7 +4,10 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
   name: {
     type: String,
     required: [true, 'A tour name must be specified'],
-    unique: true
+    unique: true,
+    trim: true,
+    maxlength: [40, 'A tour name must have less or equal then 40 characters'],
+    minlength: [10, 'A tour name must have more or equal then 10 characters']        //VALIDATION {FAT MODEL-THIN CONTROLLER} 
   },
   slug: String,
   duration: {
@@ -86,7 +89,13 @@ this.start=Date.now();
 })
 toursSchema.post(/^find/,function(docs,next){
   console.log(`Query took ${Date.now() - this.start} milliseconds`)
-  console.log(docs);
+  next();
+})
+
+//AGGREGATION MIDDLEWARE
+toursSchema.pre('aggregate',function(next){
+  this.pipeline().unshift({$match: {secretTour: { $ne: true}}})
+  console.log(this.pipeline())
   next();
 })
 const Tour = mongoose.model('Tour', toursSchema)

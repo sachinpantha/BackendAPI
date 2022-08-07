@@ -154,7 +154,7 @@ exports.SearchData = async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({
-      status: fail,
+      status: 'fail',
       message: err,
     });
   }
@@ -171,7 +171,7 @@ exports.PostData = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({
-      status: fail,
+      status: 'fail',
       message: err,
     });
   }
