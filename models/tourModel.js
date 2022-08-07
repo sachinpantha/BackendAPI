@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator=require('validator');  //VALIDATOR PACKAGE
 const toursSchema = new mongoose.Schema({ //Schema type options for more valdation
   name: {
     type: String,
@@ -7,7 +8,8 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
     unique: true,
     trim: true,
     maxlength: [40, 'A tour name must have less or equal then 40 characters'],
-    minlength: [10, 'A tour name must have more or equal then 10 characters']        //VALIDATION {FAT MODEL-THIN CONTROLLER} 
+    minlength: [10, 'A tour name must have more or equal then 10 characters']   //VALIDATION {FAT MODEL-THIN CONTROLLER} 
+    // validate:[ validator.isAlpha, 'Tour name must only characters'] //Validator package
   },
   slug: String,
   duration: {
@@ -20,11 +22,17 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
   },
   difficulty: {
     type: String,
-    required: [true, 'A tour must have difficulty']
+    required: [true, 'A tour must have difficulty'],
+    enum: {
+      values: ['easy', 'medium', 'difficulty'],
+      message: 'Difficulty is either easy, medium or difficult'
+    }
   },
   ratingsAverage: {
     type: Number,
-    default: 4.5
+    default: 4.5,
+    min: [1, 'Rating must be above 1.0'],
+    max: [5, 'Rating must be below 5.0'],
   },
   ratingsQuantity: {
     type: Number,
@@ -34,7 +42,16 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
     type: Number,
     required: [true, 'A tour price must be specified']
   },
-  priceDiscount: Number,
+  priceDiscount: {
+    type: Number,
+    validate:{
+      validator:function (val) {
+        //THIS ONLY POINTS TO CURRENT DOC ON NEW DOCUMENT CREATION
+        return val < this.price;
+      },
+      message:'Discount price {{VALUE}} must be below regular price'
+    }
+  },
   summary: {
     type: String,
     trim: true,     //This will remove white spaces from beginning and the end of string
@@ -51,9 +68,9 @@ const toursSchema = new mongoose.Schema({ //Schema type options for more valdati
     select: false   //Not displaying in api via schema
   },
   startDates: [Date],
-  secretTour:{
-       type: Boolean,
-       default:false
+  secretTour: {
+    type: Boolean,
+    default: false
   },
   description: {
     type: String,
@@ -83,18 +100,18 @@ toursSchema.pre('save', function (next) {
 
 //QUERY MIDDLEWARE
 toursSchema.pre(/^find/, function (next) {  //REGEX FOR FIND
-this.find({secretTour: {$ne: true}})
-this.start=Date.now();
+  this.find({ secretTour: { $ne: true } })
+  this.start = Date.now();
   next();
 })
-toursSchema.post(/^find/,function(docs,next){
+toursSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`)
   next();
 })
 
 //AGGREGATION MIDDLEWARE
-toursSchema.pre('aggregate',function(next){
-  this.pipeline().unshift({$match: {secretTour: { $ne: true}}})
+toursSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
   console.log(this.pipeline())
   next();
 })
