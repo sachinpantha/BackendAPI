@@ -29,3 +29,5 @@ testTour.save().then(doc=>{
 app.listen(process.env.PORT, () => {
   console.log("Server started running on port 3000");
 });
+
+//Tested in ndb
