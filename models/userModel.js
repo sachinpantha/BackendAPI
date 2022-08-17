@@ -36,10 +36,13 @@ const userSchema = new mongoose.Schema({
     }
 })
 //Encryption
+//Only run if it was modified
 userSchema.pre('save', async function(next){
     if(!this.isModified('password')) return next();
     this.password=await bcrypt.hash(this.password,12)
+    //Deletes pcs
     this.passwordConfirm=undefined;
+    next();
 })
 const User = mongoose.model('User',userSchema);
 module.exports=User;
